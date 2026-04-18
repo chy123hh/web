@@ -22,7 +22,7 @@ public class JwtUtil {
     /**
      * JWT 密钥
      */
-    @Value("${jwt.secret:campus-help-secret-key-2024}")
+    @Value("${jwt.secret:campus-help-secret-key-for-jwt-token-2024}")
     private String secret;
 
     /**
@@ -94,7 +94,17 @@ public class JwtUtil {
      * @return SecretKey
      */
     private SecretKey getSigningKey() {
+        // 如果密钥长度不足32字节，使用 SHA-256 哈希扩展
         byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+        if (keyBytes.length < 32) {
+            // 使用 SHA-256 将密钥扩展到32字节
+            try {
+                java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
+                keyBytes = digest.digest(keyBytes);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to hash JWT secret", e);
+            }
+        }
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }

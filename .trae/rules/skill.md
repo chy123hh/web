@@ -28,16 +28,16 @@
 
 ## 二、功能模块划分
 
-| 模块名     | 功能列表                                                     | 对外接口前缀         | 依赖模块            |
-| ---------- | ------------------------------------------------------------ | -------------------- | ------------------- |
-| common     | 公共工具、异常、常量、JWT、Redis/MQ封装                      | -                    | 无                  |
-| user       | 注册/登录、个人资料、积分余额、信用分                        | `/api/v1/user`       | common              |
-| task       | 发布任务、编辑任务、取消任务、任务详情、任务列表（分页筛选） | `/api/v1/task`       | user, common        |
-| order      | 接单、取消接单、上传完成凭证、确认完成、订单列表             | `/api/v1/order`      | user, task, common  |
-| message    | 站内信通知（任务被接、任务完成、系统提醒）                   | `/api/v1/message`    | user, common        |
-| search     | 任务搜索（关键词+地点+悬赏范围）                             | `/api/v1/search`     | task, common        |
-| evaluation | 评价（完成订单后互评）、信用分计算                           | `/api/v1/evaluation` | user, order, common |
-| admin      | 管理员后台（任务管理、用户封禁、数据统计）                   | `/api/v1/admin`      | user, task, order   |
+| 模块名     | 功能列表                                                     | 对外接口前缀   | 依赖模块            |
+| ---------- | ------------------------------------------------------------ | -------------- | ------------------- |
+| common     | 公共工具、异常、常量、JWT、Redis/MQ封装                      | -              | 无                  |
+| user       | 注册/登录、个人资料、积分余额、信用分                        | ` /user`       | common              |
+| task       | 发布任务、编辑任务、取消任务、任务详情、任务列表（分页筛选） | ` /task`       | user, common        |
+| order      | 接单、取消接单、上传完成凭证、确认完成、订单列表             | ` /order`      | user, task, common  |
+| message    | 站内信通知（任务被接、任务完成、系统提醒）                   | ` /message`    | user, common        |
+| search     | 任务搜索（关键词+地点+悬赏范围）                             | ` /search`     | task, common        |
+| evaluation | 评价（完成订单后互评）、信用分计算                           | ` /evaluation` | user, order, common |
+| admin      | 管理员后台（任务管理、用户封禁、数据统计）                   | ` /admin`      | user, task, order   |
 
 **开发顺序建议**：  
 common → user → task → order → message → search → evaluation → admin
@@ -182,7 +182,7 @@ pre_goods(pom)
 每个子模块都是独立的 Spring Boot 可运行 Jar（单体时统一由 starter 聚合扫描）。
 
 4.3 关键配置约定
-统一 API 前缀：/api/v1/模块名/...
+统一 API 前缀： /模块名/...
 
 统一返回格式：{ code: 200, msg: "success", data: ... }
 
@@ -220,57 +220,57 @@ Redis 键前缀：help:模块:... 例如 help:task:lock:${taskId}
 
 ### 5.1 用户模块
 
-| 方法 | 路径                    | 说明         | 请求体                            | 响应              |
-| ---- | ----------------------- | ------------ | --------------------------------- | ----------------- |
-| POST | `/api/v1/user/register` | 注册         | `{studentId, password, nickname}` | 用户ID            |
-| POST | `/api/v1/user/login`    | 登录         | `{studentId, password}`           | `{token, userId}` |
-| GET  | `/api/v1/user/profile`  | 获取个人信息 | Header: Authorization             | 用户详情          |
-| PUT  | `/api/v1/user/profile`  | 修改资料     | `{nickname, avatarUrl}`           | 成功标志          |
-| GET  | `/api/v1/user/points`   | 查询积分余额 | Header                            | 积分              |
-| GET  | `/api/v1/user/credit`   | 查询信用分   | Header                            | 信用分            |
+| 方法 | 路径              | 说明         | 请求体                            | 响应              |
+| ---- | ----------------- | ------------ | --------------------------------- | ----------------- |
+| POST | ` /user/register` | 注册         | `{studentId, password, nickname}` | 用户ID            |
+| POST | ` /user/login`    | 登录         | `{studentId, password}`           | `{token, userId}` |
+| GET  | ` /user/profile`  | 获取个人信息 | Header: Authorization             | 用户详情          |
+| PUT  | ` /user/profile`  | 修改资料     | `{nickname, avatarUrl}`           | 成功标志          |
+| GET  | ` /user/points`   | 查询积分余额 | Header                            | 积分              |
+| GET  | ` /user/credit`   | 查询信用分   | Header                            | 信用分            |
 
 ### 5.2 任务模块
 
-| 方法   | 路径                        | 说明                     | 请求体                                                                                  | 响应     |
-| ------ | --------------------------- | ------------------------ | --------------------------------------------------------------------------------------- | -------- |
-| POST   | `/api/v1/task/publish`      | 发布任务                 | `{title, description, rewardPoints, location, latitude, longitude, deadline, category}` | 任务ID   |
-| PUT    | `/api/v1/task/{taskId}`     | 编辑任务（仅待接单状态） | 同上                                                                                    | 成功标志 |
-| DELETE | `/api/v1/task/{taskId}`     | 取消任务（仅待接单状态） | -                                                                                       | 成功标志 |
-| GET    | `/api/v1/task/{taskId}`     | 任务详情                 | -                                                                                       | 任务对象 |
-| GET    | `/api/v1/task/list`         | 任务列表（分页、筛选）   | Query: status, category, page, size                                                     | 分页数据 |
-| GET    | `/api/v1/task/my-published` | 我发布的任务             | Header                                                                                  | 列表     |
+| 方法   | 路径                  | 说明                     | 请求体                                                                                  | 响应     |
+| ------ | --------------------- | ------------------------ | --------------------------------------------------------------------------------------- | -------- |
+| POST   | ` /task/publish`      | 发布任务                 | `{title, description, rewardPoints, location, latitude, longitude, deadline, category}` | 任务ID   |
+| PUT    | ` /task/{taskId}`     | 编辑任务（仅待接单状态） | 同上                                                                                    | 成功标志 |
+| DELETE | ` /task/{taskId}`     | 取消任务（仅待接单状态） | -                                                                                       | 成功标志 |
+| GET    | ` /task/{taskId}`     | 任务详情                 | -                                                                                       | 任务对象 |
+| GET    | ` /task/list`         | 任务列表（分页、筛选）   | Query: status, category, page, size                                                     | 分页数据 |
+| GET    | ` /task/my-published` | 我发布的任务             | Header                                                                                  | 列表     |
 
 ### 5.3 订单模块（接单）
 
-| 方法 | 路径                                     | 说明                       | 请求体            | 响应     |
-| ---- | ---------------------------------------- | -------------------------- | ----------------- | -------- |
-| POST | `/api/v1/order/take/{taskId}`            | 接单                       | -                 | 订单号   |
-| PUT  | `/api/v1/order/cancel/{orderId}`         | 取消接单                   | -                 | 成功标志 |
-| POST | `/api/v1/order/complete-proof/{orderId}` | 上传完成凭证               | `{proofImageUrl}` | 成功标志 |
-| PUT  | `/api/v1/order/confirm/{orderId}`        | 发布者确认完成             | -                 | 积分变动 |
-| GET  | `/api/v1/order/my-taken`                 | 我接的订单                 | Query: status     | 列表     |
-| GET  | `/api/v1/order/my-published`             | 我发布的订单对应的接单记录 | -                 | 列表     |
+| 方法 | 路径                               | 说明                       | 请求体            | 响应     |
+| ---- | ---------------------------------- | -------------------------- | ----------------- | -------- |
+| POST | ` /order/take/{taskId}`            | 接单                       | -                 | 订单号   |
+| PUT  | ` /order/cancel/{orderId}`         | 取消接单                   | -                 | 成功标志 |
+| POST | ` /order/complete-proof/{orderId}` | 上传完成凭证               | `{proofImageUrl}` | 成功标志 |
+| PUT  | ` /order/confirm/{orderId}`        | 发布者确认完成             | -                 | 积分变动 |
+| GET  | ` /order/my-taken`                 | 我接的订单                 | Query: status     | 列表     |
+| GET  | ` /order/my-published`             | 我发布的订单对应的接单记录 | -                 | 列表     |
 
 ### 5.4 搜索模块
 
-| 方法 | 路径                   | 说明         | 请求参数                                                              | 响应                       |
-| ---- | ---------------------- | ------------ | --------------------------------------------------------------------- | -------------------------- |
-| GET  | `/api/v1/search/tasks` | 全文搜索任务 | keyword, category, minPoints, maxPoints, lat, lng, radius, page, size | 分页任务ID列表（附带高亮） |
+| 方法 | 路径             | 说明         | 请求参数                                                              | 响应                       |
+| ---- | ---------------- | ------------ | --------------------------------------------------------------------- | -------------------------- |
+| GET  | ` /search/tasks` | 全文搜索任务 | keyword, category, minPoints, maxPoints, lat, lng, radius, page, size | 分页任务ID列表（附带高亮） |
 
 ### 5.5 消息模块
 
-| 方法 | 路径                               | 说明             | 响应     |
-| ---- | ---------------------------------- | ---------------- | -------- |
-| GET  | `/api/v1/message/unread-count`     | 未读消息数       | 整数     |
-| GET  | `/api/v1/message/list`             | 消息列表（分页） | 分页消息 |
-| PUT  | `/api/v1/message/read/{messageId}` | 标记已读         | 成功标志 |
+| 方法 | 路径                         | 说明             | 响应     |
+| ---- | ---------------------------- | ---------------- | -------- |
+| GET  | ` /message/unread-count`     | 未读消息数       | 整数     |
+| GET  | ` /message/list`             | 消息列表（分页） | 分页消息 |
+| PUT  | ` /message/read/{messageId}` | 标记已读         | 成功标志 |
 
 ### 5.6 评价模块
 
-| 方法 | 路径                               | 说明                 | 请求体                                | 响应     |
-| ---- | ---------------------------------- | -------------------- | ------------------------------------- | -------- |
-| POST | `/api/v1/evaluation/create`        | 对订单进行评价       | `{orderId, toUserId, score, content}` | 评价ID   |
-| GET  | `/api/v1/evaluation/user/{userId}` | 查看某用户收到的评价 | Query: page, size                     | 评价列表 |
+| 方法 | 路径                         | 说明                 | 请求体                                | 响应     |
+| ---- | ---------------------------- | -------------------- | ------------------------------------- | -------- |
+| POST | `/evaluation/create`         | 对订单进行评价       | `{orderId, toUserId, score, content}` | 评价ID   |
+| GET  | ` /evaluation/user/{userId}` | 查看某用户收到的评价 | Query: page, size                     | 评价列表 |
 ## 六、关键业务流程时序（开发必读）
 
 ### 6.1 接单流程（需分布式锁）

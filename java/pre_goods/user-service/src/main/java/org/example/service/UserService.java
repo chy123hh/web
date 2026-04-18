@@ -1,18 +1,19 @@
+package org.example.service;
 
-import org.example.entity.User;
-import org.example.service.BaseService;
-import org.example.utils.Result;
+import org.example.dto.request.LoginRequest;
+import org.example.dto.request.RegisterRequest;
+import org.example.dto.request.UpdateProfileRequest;
+import org.example.common.dto.Result;
 
-import org.springframework.stereotype.Service;
+public interface UserService {
 
-public interface UserService extends BaseService<User> {
-  Result login(UserRequest request);
+  Result login(LoginRequest request);
 
-  Result register(UserRequest request);
+  Result register(RegisterRequest request);
 
   Result profile();
 
-  Result updateProfile(UserRequest request);
+  Result updateProfile(UpdateProfileRequest request);
 
   Result points();
 
