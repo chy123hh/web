@@ -148,6 +148,7 @@ common → user → task → order → message → search → evaluation → adm
     }
   }
 }
+```
 
 ## 四、技术集成详细要求
 
@@ -359,7 +360,7 @@ public interface TaskServiceApi {
 
 // task-service 模块实现
 @Service
-public class TaskServiceImpl implements TaskServiceApi { ... }
+public class TaskServiceImpl implements TaskServiceApi {  }
 
 // 其他模块使用时通过 Spring 注入 TaskServiceApi（单体直接调用实现）
 ```
