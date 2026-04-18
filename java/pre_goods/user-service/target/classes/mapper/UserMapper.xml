@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.mapper.UserMapper">
+
+    <select id="selectByStudentId" resultType="org.example.entity.User">
+        SELECT * FROM user WHERE student_id = #{studentId}
+    </select>
+
+    <select id="existsByStudentId" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM user WHERE student_id = #{studentId}
+    </select>
+
+</mapper>
