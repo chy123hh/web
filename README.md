@@ -378,7 +378,6 @@ public class TaskServiceImpl implements TaskServiceApi {  }
 
 ## 九、论文撰写支撑材料（供后续使用）
 
-作为产品经理，我要求开发过程中保留以下产出，用于您的毕业论文：
 
 - **系统架构图**（分层架构 + 微服务演进图）
 - **E-R 图**（所有表的关联关系）

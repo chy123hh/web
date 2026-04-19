@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: task-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/task_service?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1800000
+
+server:
+  port: 8082
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      table-underline: true
+  mapper-locations: classpath:mapper/*.xml
+
+jwt:
+  secret: campus-help-secret-key-for-jwt-token-2024
+  expire: 604800000
