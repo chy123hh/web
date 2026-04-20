@@ -1,8 +1,8 @@
 spring:
   application:
-    name: user-service
+    name: order-service
   datasource:
-    url: jdbc:mysql://localhost:3306/user_service?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/order_service?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -12,8 +12,21 @@ spring:
       idle-timeout: 300000
       connection-timeout: 20000
       max-lifetime: 1800000
+  data:
+    redis:
+      host: 192.168.199.130
+      port: 6379
+      database: 0
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
 
-# MyBatis-Plus 配置
+server:
+  port: 8083
+
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
@@ -24,9 +37,6 @@ mybatis-plus:
       table-underline: true
   mapper-locations: classpath:mapper/*.xml
 
-# JWT 配置
 jwt:
   secret: campus-help-secret-key-for-jwt-token-2024
-  expire: 604800000  # 7天（毫秒）
-server:
-  port: 8081
+  expire: 604800000

@@ -484,4 +484,206 @@ SecurityContextHolder.getContext().setAuthentication(authentication);
 | 401 | 未登录或 token 无效 |
 | 500 | 服务器内部错误 |
 
+### order-service
+
+订单服务模块，提供接单、取消接单、上传完成凭证、确认完成等功能。
+
+#### 订单状态说明
+| 状态 | 说明 |
+|------|------|
+| 1 | 已接单 |
+| 2 | 已完成（待确认） |
+| 3 | 已确认 |
+| 4 | 已取消 |
+
+#### 接口列表
+
+##### 1. 接单
+- **接口**: `POST /order/take/{taskId}`
+- **描述**: 接受任务并创建订单（使用Redis分布式锁防止并发接单）
+- **请求头**: `Authorization: Bearer {token}`
+- **请求参数**:
+```
+publisherId: 8      // 发布者ID，必填
+rewardPoints: 10    // 悬赏积分，必填
+```
+- **响应结果**:
+```json
+// 成功
+{
+  "code": 200,
+  "message": "success",
+  "data": "ORD1745112345678ABCD"    // 订单号
+}
+
+// 失败 - 不能接自己的任务
+{
+  "code": 400,
+  "message": "不能接自己发布的任务",
+  "data": null
+}
+
+// 失败 - 任务已被接单
+{
+  "code": 400,
+  "message": "该任务已被接单",
+  "data": null
+}
+
+// 失败 - 并发冲突
+{
+  "code": 400,
+  "message": "该任务正在被其他用户接单，请稍后再试",
+  "data": null
+}
+```
+
+##### 2. 取消接单
+- **接口**: `PUT /order/cancel/{orderId}`
+- **描述**: 取消已接的订单（仅限接单人且订单状态为已接单）
+- **请求头**: `Authorization: Bearer {token}`
+- **响应结果**:
+```json
+// 成功
+{
+  "code": 200,
+  "message": "success",
+  "data": "取消接单成功"
+}
+
+// 失败 - 无权操作
+{
+  "code": 403,
+  "message": "只有接单人可以取消订单",
+  "data": null
+}
+
+// 失败 - 状态不允许
+{
+  "code": 400,
+  "message": "只能取消已接单的订单",
+  "data": null
+}
+```
+
+##### 3. 上传完成凭证
+- **接口**: `POST /order/complete-proof/{orderId}`
+- **描述**: 接单人上传任务完成的凭证图片
+- **请求头**: `Authorization: Bearer {token}`
+- **请求体**:
+```json
+{
+  "proofImageUrl": "http://example.com/proof.jpg"    // 凭证图片URL，必填
+}
+```
+- **响应结果**:
+```json
+// 成功
+{
+  "code": 200,
+  "message": "success",
+  "data": "上传完成凭证成功"
+}
+
+// 失败 - 无权操作
+{
+  "code": 403,
+  "message": "只有接单人可以上传完成凭证",
+  "data": null
+}
+```
+
+##### 4. 确认完成
+- **接口**: `PUT /order/confirm/{orderId}`
+- **描述**: 发布者确认任务完成，积分转移给接单人
+- **请求头**: `Authorization: Bearer {token}`
+- **响应结果**:
+```json
+// 成功
+{
+  "code": 200,
+  "message": "success",
+  "data": "确认完成成功，积分已转移"
+}
+
+// 失败 - 无权操作
+{
+  "code": 403,
+  "message": "只有发布者可以确认完成",
+  "data": null
+}
+
+// 失败 - 状态不允许
+{
+  "code": 400,
+  "message": "只能确认已上传凭证的订单",
+  "data": null
+}
+```
+
+##### 5. 查询我接的订单
+- **接口**: `GET /order/my-taken`
+- **描述**: 查询当前用户接单的所有订单
+- **请求头**: `Authorization: Bearer {token}`
+- **响应结果**:
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": [
+    {
+      "id": 1,
+      "orderNo": "ORD1745112345678ABCD",
+      "taskId": 1,
+      "takerId": 7,
+      "publisherId": 8,
+      "rewardPoints": 10,
+      "status": 1,
+      "statusDesc": "已接单",
+      "completeProofUrl": null,
+      "confirmTime": null,
+      "createTime": "2026-04-20T10:30:00",
+      "updateTime": "2026-04-20T10:30:00"
+    }
+  ]
+}
+```
+
+##### 6. 查询我发布的订单
+- **接口**: `GET /order/my-published`
+- **描述**: 查询当前用户发布的任务对应的接单记录
+- **请求头**: `Authorization: Bearer {token}`
+- **响应结果**:
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": [
+    {
+      "id": 1,
+      "orderNo": "ORD1745112345678ABCD",
+      "taskId": 1,
+      "takerId": 7,
+      "publisherId": 8,
+      "rewardPoints": 10,
+      "status": 2,
+      "statusDesc": "已完成（待确认）",
+      "completeProofUrl": "http://example.com/proof.jpg",
+      "confirmTime": null,
+      "createTime": "2026-04-20T10:30:00",
+      "updateTime": "2026-04-20T10:35:00"
+    }
+  ]
+}
+```
+
+#### 技术特性
+
+1. **Redis分布式锁**: 使用 `help:order:lock:{taskId}` 作为锁key，防止同一任务被多人同时接单
+2. **订单号生成**: 格式为 `ORD` + 时间戳 + 4位随机字符
+3. **状态流转**: 已接单 → 已完成(待确认) → 已确认
+4. **权限控制**: 
+   - 只有接单人可以取消订单和上传凭证
+   - 只有发布者可以确认完成
+   - 不能接自己发布的任务
 

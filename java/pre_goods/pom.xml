@@ -57,6 +57,8 @@
         <module>user-service</module>
 
         <module>task-service</module>
+        <module>order-service</module>
+        <module>message-service</module>
     </modules>
 
     <build>

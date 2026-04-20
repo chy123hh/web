@@ -46,7 +46,7 @@ common → user → task → order → message → search → evaluation → adm
 
 ### 3.1 数据库名
 
-`campus_help`
+`root`
 
 ### 3.2 表结构
 

@@ -6,7 +6,8 @@ trigger: always_on
 * 账号 123
 * 密码 123456
 * token Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjcsImlhdCI6MTc3NjU5MjI3MiwiZXhwIjoxNzc3MTk3MDcyfQ.CmeZVboZrxmujSRKDdAmGiLN8Ni0HYw3Zjw8gjlm25
-
+* mysql 账号 root 密码 123456 本机
+* redis 账号 密码 没有设置 192.168.199.130 6379
 1. PowerShell,bash语法,curl,run_in_terminal
 
 

@@ -28,3 +28,5 @@ mybatis-plus:
 jwt:
   secret: campus-help-secret-key-for-jwt-token-2024
   expire: 604800000  # 7天（毫秒）
+server:
+  port: 8081
