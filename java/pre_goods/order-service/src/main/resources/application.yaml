@@ -1,10 +1,12 @@
 spring:
+  config:
+    import: classpath:config/db-redis.yml
   application:
     name: order-service
   datasource:
-    url: jdbc:mysql://localhost:3306/order_service?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: root
-    password: 123456
+    url: jdbc:mysql://${db.host}:${db.port}/order_service?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${db.username}
+    password: ${db.password}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       minimum-idle: 5
@@ -14,15 +16,15 @@ spring:
       max-lifetime: 1800000
   data:
     redis:
-      host: 192.168.199.130
-      port: 6379
-      database: 0
-      timeout: 2000ms
+      host: ${redis.host}
+      port: ${redis.port}
+      database: ${redis.database}
+      timeout: ${redis.timeout}
       lettuce:
         pool:
-          max-active: 8
-          max-idle: 8
-          min-idle: 0
+          max-active: ${redis.lettuce.pool.max-active}
+          max-idle: ${redis.lettuce.pool.max-idle}
+          min-idle: ${redis.lettuce.pool.min-idle}
 
 server:
   port: 8083

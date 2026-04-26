@@ -14,7 +14,7 @@ public class LoginRequest {
      * 学号（登录账号）
      */
     @NotBlank(message = "学号不能为空")
-    @Size(min = 6, max = 20, message = "学号长度必须在6-20之间")
+    @Size(min = 3, max = 20, message = "学号长度必须在3-20之间")
     private String studentId;
 
     /**

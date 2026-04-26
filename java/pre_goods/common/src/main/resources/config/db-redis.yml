@@ -1,0 +1,39 @@
+# =====================================================
+# 数据库 & Redis 连接配置（集中管理IP和账号）
+# 位置: common/src/main/resources/config/db-redis.yml
+# 
+# 使用方式：各服务通过 spring.config.import 导入
+#   spring:
+#     config:
+#       import: classpath:config/db-redis.yml
+# 
+# 动态切换环境：
+#   方式1 - 修改本文件
+#   方式2 - 启动时覆盖: --db.host=192.168.1.100 --redis.host=192.168.1.101
+#   方式3 - 环境变量: DB_HOST=192.168.1.100 REDIS_HOST=192.168.1.101
+# =====================================================
+
+# ---------- MySQL 数据库连接 ----------
+db:
+  # host: localhost
+  host: 192.168.100.129
+  port: 3306
+  username: root
+  #password: 123456
+  password: 123
+
+# ---------- Redis 连接 ----------
+redis:
+  host: 192.168.100.129
+  #host: 192.168.199.130
+  port: 6379
+  password:
+  database: 0
+  timeout: 2000ms
+  lettuce:
+    pool:
+      max-active: 8
+      max-idle: 8
+      min-idle: 0
+elasticsearch:
+  host: 192.168.100.129

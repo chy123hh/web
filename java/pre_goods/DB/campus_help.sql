@@ -1,7 +1,7 @@
 -- 创建数据库
-CREATE DATABASE IF NOT EXISTS campus_help DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS user_service DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-USE campus_help;
+USE user_service;
 
 -- 用户表
 CREATE TABLE IF NOT EXISTS `user` (

@@ -2,19 +2,22 @@ server:
   port: 8087
 
 spring:
+  config:
+    import: classpath:config/db-redis.yml
   application:
     name: admin-service
   datasource:
-    url: jdbc:mysql://localhost:3306/user_service?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: root
-    password: 123456
+    url: jdbc:mysql://${db.host}:${db.port}/task_service?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${db.username}
+    password: ${db.password}
     driver-class-name: com.mysql.cj.jdbc.Driver
   data:
     redis:
-      host: 192.168.199.130
-      port: 6379
+      host: ${redis.host}
+      port: ${redis.port}
 
 mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*.xml
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
