@@ -59,6 +59,9 @@
         <module>task-service</module>
         <module>order-service</module>
         <module>message-service</module>
+        <module>search-service</module>
+        <module>evaluation-service</module>
+        <module>admin-service</module>
     </modules>
 
     <build>

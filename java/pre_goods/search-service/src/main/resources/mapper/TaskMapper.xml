@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.mapper.TaskMapper">
+
+    <resultMap id="BaseResultMap" type="org.example.entity.Task">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="title" property="title"/>
+        <result column="description" property="description"/>
+        <result column="type" property="type"/>
+        <result column="reward" property="reward"/>
+        <result column="pickup_location" property="pickupLocation"/>
+        <result column="delivery_location" property="deliveryLocation"/>
+        <result column="status" property="status"/>
+        <result column="acceptor_id" property="acceptorId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deadline" property="deadline"/>
+    </resultMap>
+
+    <select id="searchTasks" resultMap="BaseResultMap">
+        SELECT * FROM task
+        WHERE 1=1
+        <choose>
+            <when test="status != null and status != ''">
+                AND status = #{status}
+            </when>
+            <otherwise>
+                AND status = 'PENDING'
+            </otherwise>
+        </choose>
+        <if test="keyword != null and keyword != ''">
+            AND (title LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="type != null and type != ''">
+            AND type = #{type}
+        </if>
+        <if test="minReward != null">
+            AND reward >= #{minReward}
+        </if>
+        <if test="maxReward != null">
+            AND reward <= #{maxReward}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>
