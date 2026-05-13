@@ -1,9 +1,12 @@
 package org.example.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.common.dto.PageResult;
 import org.example.common.dto.Result;
 import org.example.common.util.JwtUtil;
 import org.example.dto.request.CompleteProofRequest;
@@ -97,8 +100,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             redisTemplate.execute(
                     new org.springframework.data.redis.core.script.DefaultRedisScript<>(script, Long.class),
                     List.of(lockKey),
-                    lockValue
-            );
+                    lockValue);
         }
     }
 
@@ -197,31 +199,61 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
-    public Result listMyTakenOrders() {
+    public Result listMyTakenOrders(Integer page, Integer size) {
         Long userId = getCurrentUserId();
         if (userId == null) {
             return Result.error(401, "用户未登录");
         }
 
-        List<Order> orders = orderMapper.selectByTakerId(userId);
-        List<OrderResponse> responses = orders.stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
-        return Result.success(responses);
+        // 创建分页对象
+        Page<Order> orderPage = new Page<>(page, size);
+        // 使用 MyBatis-Plus LambdaQueryWrapper 构建条件查询
+        Page<Order> resultPage = this.page(
+                orderPage,
+                new LambdaQueryWrapper<Order>()
+                        .eq(Order::getTakerId, userId)
+                        .orderByDesc(Order::getCreateTime));
+
+        // 使用 PageResult 封装分页数据
+        PageResult<OrderResponse> pageResult = PageResult.of(
+                resultPage.getRecords().stream()
+                        .map(this::convertToResponse)
+                        .collect(Collectors.toList()),
+                resultPage.getTotal(),
+                resultPage.getPages(),
+                resultPage.getCurrent(),
+                resultPage.getSize());
+
+        return Result.success(pageResult);
     }
 
     @Override
-    public Result listMyPublishedOrders() {
+    public Result listMyPublishedOrders(Integer page, Integer size) {
         Long userId = getCurrentUserId();
         if (userId == null) {
             return Result.error(401, "用户未登录");
         }
 
-        List<Order> orders = orderMapper.selectByPublisherId(userId);
-        List<OrderResponse> responses = orders.stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
-        return Result.success(responses);
+        // 创建分页对象
+        Page<Order> orderPage = new Page<>(page, size);
+        // 使用 MyBatis-Plus LambdaQueryWrapper 构建条件查询
+        Page<Order> resultPage = this.page(
+                orderPage,
+                new LambdaQueryWrapper<Order>()
+                        .eq(Order::getPublisherId, userId)
+                        .orderByDesc(Order::getCreateTime));
+
+        // 使用 PageResult 封装分页数据
+        PageResult<OrderResponse> pageResult = PageResult.of(
+                resultPage.getRecords().stream()
+                        .map(this::convertToResponse)
+                        .collect(Collectors.toList()),
+                resultPage.getTotal(),
+                resultPage.getPages(),
+                resultPage.getCurrent(),
+                resultPage.getSize());
+
+        return Result.success(pageResult);
     }
 
     private Long getCurrentUserId() {
@@ -245,13 +277,19 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     private String getStatusDesc(Integer status) {
-        if (status == null) return "未知";
+        if (status == null)
+            return "未知";
         switch (status) {
-            case 1: return "已接单";
-            case 2: return "已完成（待确认）";
-            case 3: return "已确认";
-            case 4: return "已取消";
-            default: return "未知";
+            case 1:
+                return "已接单";
+            case 2:
+                return "已完成（待确认）";
+            case 3:
+                return "已确认";
+            case 4:
+                return "已取消";
+            default:
+                return "未知";
         }
     }
 }

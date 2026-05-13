@@ -20,27 +20,28 @@
 
     <select id="searchTasks" resultMap="BaseResultMap">
         SELECT * FROM task
-        WHERE 1=1
-        <choose>
-            <when test="status != null and status != ''">
-                AND status = #{status}
-            </when>
-            <otherwise>
-                AND status = 'PENDING'
-            </otherwise>
-        </choose>
-        <if test="keyword != null and keyword != ''">
-            AND (title LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%'))
-        </if>
-        <if test="type != null and type != ''">
-            AND type = #{type}
-        </if>
-        <if test="minReward != null">
-            AND reward >= #{minReward}
-        </if>
-        <if test="maxReward != null">
-            AND reward <= #{maxReward}
-        </if>
+        <where>
+            <choose>
+                <when test="status != null and status != ''">
+                    status = #{status}
+                </when>
+                <otherwise>
+                    status = 'PENDING'
+                </otherwise>
+            </choose>
+            <if test="keyword != null and keyword != ''">
+                AND (title LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="type != null and type != ''">
+                AND type = #{type}
+            </if>
+            <if test="minReward != null">
+                AND reward &gt;= #{minReward}
+            </if>
+            <if test="maxReward != null">
+                AND reward &lt;= #{maxReward}
+            </if>
+        </where>
         ORDER BY create_time DESC
     </select>
 

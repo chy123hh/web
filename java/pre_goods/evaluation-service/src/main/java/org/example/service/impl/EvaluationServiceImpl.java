@@ -1,8 +1,11 @@
 package org.example.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.common.dto.PageResult;
+import org.example.common.dto.Result;
 import org.example.common.exception.BusinessException;
 import org.example.dto.request.EvaluationRequest;
 import org.example.dto.response.EvaluationResponse;
@@ -25,19 +28,19 @@ public class EvaluationServiceImpl implements EvaluationService {
     @Override
     public Long createEvaluation(Long evaluatorId, EvaluationRequest request) {
         // 验证评价类型
-        if (!Evaluation.TYPE_TO_TAKER.equals(request.getType()) 
-            && !Evaluation.TYPE_TO_PUBLISHER.equals(request.getType())) {
+        if (!Evaluation.TYPE_TO_TAKER.equals(request.getType())
+                && !Evaluation.TYPE_TO_PUBLISHER.equals(request.getType())) {
             throw new BusinessException(400, "评价类型不正确");
         }
 
         // 检查是否已经评价过
         LambdaQueryWrapper<Evaluation> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Evaluation::getTaskId, request.getTaskId())
-                   .eq(Evaluation::getOrderId, request.getOrderId())
-                   .eq(Evaluation::getEvaluatorId, evaluatorId)
-                   .eq(Evaluation::getType, request.getType())
-                   .eq(Evaluation::getDeleted, 0);
-        
+                .eq(Evaluation::getOrderId, request.getOrderId())
+                .eq(Evaluation::getEvaluatorId, evaluatorId)
+                .eq(Evaluation::getType, request.getType())
+                .eq(Evaluation::getDeleted, 0);
+
         Long count = evaluationMapper.selectCount(queryWrapper);
         if (count > 0) {
             throw new BusinessException(400, "您已经评价过该订单");
@@ -58,9 +61,9 @@ public class EvaluationServiceImpl implements EvaluationService {
                 .build();
 
         evaluationMapper.insert(evaluation);
-        log.info("创建评价成功，评价ID: {}, 评价人: {}, 被评价人: {}", 
+        log.info("创建评价成功，评价ID: {}, 评价人: {}, 被评价人: {}",
                 evaluation.getId(), evaluatorId, request.getEvaluatedId());
-        
+
         return evaluation.getId();
     }
 
@@ -74,38 +77,62 @@ public class EvaluationServiceImpl implements EvaluationService {
     }
 
     @Override
-    public List<EvaluationResponse> getEvaluationsReceived(Long userId) {
+    public Result getEvaluationsReceived(Long userId, Integer page, Integer size) {
+        // 创建分页对象
+        Page<Evaluation> evaluationPage = new Page<>(page, size);
+        // 使用 MyBatis-Plus LambdaQueryWrapper 构建条件查询
         LambdaQueryWrapper<Evaluation> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Evaluation::getEvaluatedId, userId)
-                   .eq(Evaluation::getDeleted, 0)
-                   .orderByDesc(Evaluation::getCreateTime);
-        
-        List<Evaluation> evaluations = evaluationMapper.selectList(queryWrapper);
-        return evaluations.stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
+                .eq(Evaluation::getDeleted, 0)
+                .orderByDesc(Evaluation::getCreateTime);
+
+        Page<Evaluation> resultPage = evaluationMapper.selectPage(evaluationPage, queryWrapper);
+
+        // 使用 PageResult 封装分页数据
+        PageResult<EvaluationResponse> pageResult = PageResult.of(
+                resultPage.getRecords().stream()
+                        .map(this::convertToResponse)
+                        .collect(Collectors.toList()),
+                resultPage.getTotal(),
+                resultPage.getPages(),
+                resultPage.getCurrent(),
+                resultPage.getSize());
+
+        return Result.success(pageResult);
     }
 
     @Override
-    public List<EvaluationResponse> getEvaluationsGiven(Long userId) {
+    public Result getEvaluationsGiven(Long userId, Integer page, Integer size) {
+        // 创建分页对象
+        Page<Evaluation> evaluationPage = new Page<>(page, size);
+        // 使用 MyBatis-Plus LambdaQueryWrapper 构建条件查询
         LambdaQueryWrapper<Evaluation> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Evaluation::getEvaluatorId, userId)
-                   .eq(Evaluation::getDeleted, 0)
-                   .orderByDesc(Evaluation::getCreateTime);
-        
-        List<Evaluation> evaluations = evaluationMapper.selectList(queryWrapper);
-        return evaluations.stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
+                .eq(Evaluation::getDeleted, 0)
+                .orderByDesc(Evaluation::getCreateTime);
+
+        Page<Evaluation> resultPage = evaluationMapper.selectPage(evaluationPage, queryWrapper);
+
+        // 使用 PageResult 封装分页数据
+        PageResult<EvaluationResponse> pageResult = PageResult.of(
+                resultPage.getRecords().stream()
+                        .map(this::convertToResponse)
+                        .collect(Collectors.toList()),
+                resultPage.getTotal(),
+                resultPage.getPages(),
+                resultPage.getCurrent(),
+                resultPage.getSize());
+
+        return Result.success(pageResult);
     }
 
     @Override
     public List<EvaluationResponse> getEvaluationsByTaskId(Long taskId) {
         LambdaQueryWrapper<Evaluation> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Evaluation::getTaskId, taskId)
-                   .eq(Evaluation::getDeleted, 0)
-                   .orderByDesc(Evaluation::getCreateTime);
-        
+                .eq(Evaluation::getDeleted, 0)
+                .orderByDesc(Evaluation::getCreateTime);
+
         List<Evaluation> evaluations = evaluationMapper.selectList(queryWrapper);
         return evaluations.stream()
                 .map(this::convertToResponse)
@@ -116,26 +143,26 @@ public class EvaluationServiceImpl implements EvaluationService {
     public Double getAverageRating(Long userId) {
         LambdaQueryWrapper<Evaluation> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Evaluation::getEvaluatedId, userId)
-                   .eq(Evaluation::getDeleted, 0)
-                   .select(Evaluation::getRating);
-        
+                .eq(Evaluation::getDeleted, 0)
+                .select(Evaluation::getRating);
+
         List<Evaluation> evaluations = evaluationMapper.selectList(queryWrapper);
         if (evaluations.isEmpty()) {
             return 0.0;
         }
-        
+
         double sum = evaluations.stream()
                 .mapToInt(Evaluation::getRating)
                 .sum();
-        
+
         return sum / evaluations.size();
     }
 
     private EvaluationResponse convertToResponse(Evaluation evaluation) {
-        String typeDesc = Evaluation.TYPE_TO_TAKER.equals(evaluation.getType()) 
-                ? "对接单人评价" 
+        String typeDesc = Evaluation.TYPE_TO_TAKER.equals(evaluation.getType())
+                ? "对接单人评价"
                 : "对发布者评价";
-        
+
         return EvaluationResponse.builder()
                 .id(evaluation.getId())
                 .taskId(evaluation.getTaskId())

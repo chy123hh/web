@@ -14,13 +14,13 @@ public interface TaskService {
 
     Result getTaskById(Long id);
 
-    Result listAllTasks();
+    Result listAllTasks(Integer page, Integer size);
 
-    Result listTasksByStatus(String status);
+    Result listTasksByStatus(String status, Integer page, Integer size);
 
-    Result listMyTasks();
+    Result listMyTasks(Integer page, Integer size);
 
-    Result listMyAcceptedTasks();
+    Result listMyAcceptedTasks(Integer page, Integer size);
 
     Result acceptTask(Long id);
 

@@ -11,13 +11,14 @@ import org.example.dto.response.UserProfileResponse;
 import org.example.entity.User;
 import org.example.mapper.UserMapper;
 import org.example.service.UserService;
+import org.example.util.PasswordUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 
 @Service
@@ -26,12 +27,36 @@ public class UserServiceImpl implements UserService {
 
   @Resource
   private UserMapper userMapper;
-
-  @Resource
-  private PasswordEncoder passwordEncoder;
+  private PasswordUtil passwordUtil;
 
   @Resource
   private JwtUtil jwtUtil;
+
+  /**
+   * 从请求头获取当前登录用户 ID
+   * 网关认证后会将 userId 放入 X-User-Id 请求头
+   *
+   * @return 用户 ID
+   */
+  private Long getCurrentUserId() {
+    ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+    if (attributes == null) {
+      log.error("无法获取请求上下文");
+      return null;
+    }
+    HttpServletRequest request = attributes.getRequest();
+    String userIdHeader = request.getHeader("X-User-Id");
+    if (userIdHeader == null || userIdHeader.isEmpty()) {
+      log.error("请求头中缺少 X-User-Id");
+      return null;
+    }
+    try {
+      return Long.parseLong(userIdHeader);
+    } catch (NumberFormatException e) {
+      log.error("X-User-Id 格式错误：{}", userIdHeader);
+      return null;
+    }
+  }
 
   @Override
   public Result login(LoginRequest request) {
@@ -44,14 +69,15 @@ public class UserServiceImpl implements UserService {
       return Result.error(2001, "学号或密码错误");
     }
 
-    if (!passwordEncoder.matches(request.getPassword(), dbUser.getPassword())) {
+    // 使用 BCrypt 验证密码
+    if (!passwordUtil.matches(request.getPassword(), dbUser.getPassword())) {
       log.error("密码错误，学号：{}", request.getStudentId());
       return Result.error(2001, "学号或密码错误");
     }
 
     String token = jwtUtil.generateToken(dbUser.getId());
 
-    log.info("登录成功，用户ID：{}", dbUser.getId());
+    log.info("登录成功，用户 ID：{}", dbUser.getId());
     return Result.success(LoginResponse.builder()
         .token(token)
         .userId(dbUser.getId())
@@ -71,7 +97,8 @@ public class UserServiceImpl implements UserService {
 
     User user = new User();
     user.setStudentId(request.getStudentId());
-    user.setPassword(passwordEncoder.encode(request.getPassword()));
+    // 使用 BCrypt 加密密码
+    user.setPassword(passwordUtil.encode(request.getPassword()));
     user.setNickname(request.getNickname());
     user.setPoints(0);
     user.setCreditScore(100);
@@ -82,7 +109,7 @@ public class UserServiceImpl implements UserService {
 
     userMapper.insert(user);
 
-    log.info("用户注册成功，用户ID：{}", user.getId());
+    log.info("用户注册成功，用户 ID：{}", user.getId());
     return Result.success(user.getId());
   }
 
@@ -172,20 +199,49 @@ public class UserServiceImpl implements UserService {
         .build());
   }
 
-  /**
-   * 从 SecurityContext 获取当前登录用户ID
-   * JWT过滤器已解析Token并设置认证信息，这里直接获取
-   *
-   * @return 用户ID，未登录返回null
-   */
-  private Long getCurrentUserId() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication != null && authentication.isAuthenticated()) {
-      Object principal = authentication.getPrincipal();
-      if (principal instanceof Long) {
-        return (Long) principal;
-      }
+  @Override
+  public Result getUserProfileById(Long userId) {
+    log.info("根据用户 ID 获取用户信息，userId: {}", userId);
+
+    User user = userMapper.selectById(userId);
+
+    if (user == null) {
+      return Result.error(2001, "用户不存在");
     }
-    return null;
+
+    return Result.success(UserProfileResponse.builder()
+        .userId(user.getId())
+        .studentId(user.getStudentId())
+        .nickname(user.getNickname())
+        .avatarUrl(user.getAvatarUrl())
+        .points(user.getPoints())
+        .creditScore(user.getCreditScore())
+        .role(user.getRole())
+        .status(user.getStatus())
+        .createTime(user.getCreateTime())
+        .build());
+  }
+
+  @Override
+  public Result getUserByStudentId(String studentId) {
+    log.info("根据学号获取用户信息，studentId: {}", studentId);
+
+    User user = userMapper.selectByStudentId(studentId);
+
+    if (user == null) {
+      return Result.error(2001, "用户不存在");
+    }
+
+    return Result.success(UserProfileResponse.builder()
+        .userId(user.getId())
+        .studentId(user.getStudentId())
+        .nickname(user.getNickname())
+        .avatarUrl(user.getAvatarUrl())
+        .points(user.getPoints())
+        .creditScore(user.getCreditScore())
+        .role(user.getRole())
+        .status(user.getStatus())
+        .createTime(user.getCreateTime())
+        .build());
   }
 }

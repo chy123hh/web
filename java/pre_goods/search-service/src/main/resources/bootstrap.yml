@@ -1,0 +1,17 @@
+# 引导配置文件 - 用于配置 Nacos 等外部化配置
+spring:
+  application:
+    name: search-service  # 应用名称
+  cloud:
+    nacos:
+      config:
+        server-addr: 192.168.199.130:8848  # Nacos 服务器地址
+        file-extension: yml  # 配置文件格式
+        namespace: ""  # 命名空间，默认为 public
+        group: DEFAULT_GROUP  # 配置分组
+        refresh-enabled: true  # 是否启用配置刷新
+      discovery:
+        server-addr: 192.168.199.130:8848  # Nacos 服务注册中心地址
+        enabled: true  # 启用服务注册与发现
+        namespace: ""  # 命名空间
+        group: DEFAULT_GROUP  # 服务分组

@@ -1,9 +1,12 @@
 package org.example.service.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.common.dto.PageResult;
 import org.example.common.dto.Result;
 import org.example.common.util.JwtUtil;
 import org.example.dto.request.CreateTaskRequest;
@@ -16,7 +19,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -114,49 +116,105 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
     }
 
     @Override
-    public Result listAllTasks() {
-        List<Task> tasks = list();
-        List<TaskResponse> responses = tasks.stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
-        return Result.success(responses);
+    public Result listAllTasks(Integer page, Integer size) {
+        // 创建分页对象
+        Page<Task> taskPage = new Page<>(page, size);
+        // 使用 MyBatis-Plus 的 page 方法进行分页查询
+        Page<Task> resultPage = this.page(taskPage);
+
+        // 使用 PageResult 封装分页数据
+        PageResult<TaskResponse> pageResult = PageResult.of(
+                resultPage.getRecords().stream()
+                        .map(this::convertToResponse)
+                        .collect(Collectors.toList()),
+                resultPage.getTotal(),
+                resultPage.getPages(),
+                resultPage.getCurrent(),
+                resultPage.getSize());
+
+        return Result.success(pageResult);
     }
 
     @Override
-    public Result listTasksByStatus(String status) {
-        List<Task> tasks = taskMapper.selectByStatus(status);
-        List<TaskResponse> responses = tasks.stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
-        return Result.success(responses);
+    public Result listTasksByStatus(String status, Integer page, Integer size) {
+        // 创建分页对象
+        Page<Task> taskPage = new Page<>(page, size);
+        // 使用 MyBatis-Plus LambdaQueryWrapper 构建条件查询
+        Page<Task> resultPage = this.page(
+                taskPage,
+                new LambdaQueryWrapper<Task>()
+                        .eq(Task::getStatus, status)
+                        .orderByDesc(Task::getCreateTime));
+
+        // 使用 PageResult 封装分页数据
+        PageResult<TaskResponse> pageResult = PageResult.of(
+                resultPage.getRecords().stream()
+                        .map(this::convertToResponse)
+                        .collect(Collectors.toList()),
+                resultPage.getTotal(),
+                resultPage.getPages(),
+                resultPage.getCurrent(),
+                resultPage.getSize());
+
+        return Result.success(pageResult);
     }
 
     @Override
-    public Result listMyTasks() {
+    public Result listMyTasks(Integer page, Integer size) {
         Long userId = getCurrentUserId();
         if (userId == null) {
             return Result.error(401, "用户未登录");
         }
 
-        List<Task> tasks = taskMapper.selectByUserId(userId);
-        List<TaskResponse> responses = tasks.stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
-        return Result.success(responses);
+        // 创建分页对象
+        Page<Task> taskPage = new Page<>(page, size);
+        // 使用 MyBatis-Plus LambdaQueryWrapper 构建条件查询
+        Page<Task> resultPage = this.page(
+                taskPage,
+                new LambdaQueryWrapper<Task>()
+                        .eq(Task::getUserId, userId)
+                        .orderByDesc(Task::getCreateTime));
+
+        // 使用 PageResult 封装分页数据
+        PageResult<TaskResponse> pageResult = PageResult.of(
+                resultPage.getRecords().stream()
+                        .map(this::convertToResponse)
+                        .collect(Collectors.toList()),
+                resultPage.getTotal(),
+                resultPage.getPages(),
+                resultPage.getCurrent(),
+                resultPage.getSize());
+
+        return Result.success(pageResult);
     }
 
     @Override
-    public Result listMyAcceptedTasks() {
+    public Result listMyAcceptedTasks(Integer page, Integer size) {
         Long userId = getCurrentUserId();
         if (userId == null) {
             return Result.error(401, "用户未登录");
         }
 
-        List<Task> tasks = taskMapper.selectByAcceptorId(userId);
-        List<TaskResponse> responses = tasks.stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
-        return Result.success(responses);
+        // 创建分页对象
+        Page<Task> taskPage = new Page<>(page, size);
+        // 使用 MyBatis-Plus LambdaQueryWrapper 构建条件查询
+        Page<Task> resultPage = this.page(
+                taskPage,
+                new LambdaQueryWrapper<Task>()
+                        .eq(Task::getAcceptorId, userId)
+                        .orderByDesc(Task::getCreateTime));
+
+        // 使用 PageResult 封装分页数据
+        PageResult<TaskResponse> pageResult = PageResult.of(
+                resultPage.getRecords().stream()
+                        .map(this::convertToResponse)
+                        .collect(Collectors.toList()),
+                resultPage.getTotal(),
+                resultPage.getPages(),
+                resultPage.getCurrent(),
+                resultPage.getSize());
+
+        return Result.success(pageResult);
     }
 
     @Override

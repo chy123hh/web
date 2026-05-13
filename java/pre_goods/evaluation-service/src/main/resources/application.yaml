@@ -1,11 +1,11 @@
 server:
-  port: 8085
+  port: 8086
 
 spring:
   application:
     name: evaluation-service
   datasource:
-    url: jdbc:mysql://localhost:3306/evaluation_service?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://192.168.199.130:3306/evaluation_service?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -33,3 +33,24 @@ jwt:
 logging:
   level:
     org.example: debug
+
+# Feign 配置
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 10000
+        loggerLevel: BASIC
+  compression:
+    request:
+      enabled: true
+      mime-types: text/xml,application/xml,application/json
+      min-request-size: 2048
+    response:
+      enabled: true
+  okhttp:
+    enabled: true
+    connection-pool:
+      max-idle-connections: 5
+      keep-alive-minutes: 5

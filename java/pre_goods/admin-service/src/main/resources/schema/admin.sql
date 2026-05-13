@@ -1,46 +1,58 @@
--- ============================================
--- 后台管理服务数据库初始化脚本
--- 数据库: admin_service
--- ============================================
+-- 管理员服务数据库初始化脚本
+-- 注意：admin-service 需要访问多个数据库，这里只创建必要的视图或跨数据库查询
 
-CREATE DATABASE IF NOT EXISTS admin_service DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- 创建用户统计视图（在 user_service 数据库中）
+CREATE OR REPLACE VIEW user_stats AS
+SELECT 
+    COUNT(*) as total_users,
+    COUNT(CASE WHEN status = 2 THEN 1 END) as banned_users,
+    COUNT(CASE WHEN role = 1 THEN 1 END) as admin_users,
+    AVG(credit_score) as avg_credit_score,
+    SUM(points) as total_points
+FROM user;
 
-USE admin_service;
+-- 创建任务统计视图（在 task_service 数据库中）
+CREATE OR REPLACE VIEW task_stats AS
+SELECT 
+    COUNT(*) as total_tasks,
+    COUNT(CASE WHEN status = 'PENDING' THEN 1 END) as pending_tasks,
+    COUNT(CASE WHEN status = 'ACCEPTED' THEN 1 END) as accepted_tasks,
+    COUNT(CASE WHEN status = 'COMPLETED' THEN 1 END) as completed_tasks,
+    COUNT(CASE WHEN status = 'CANCELLED' THEN 1 END) as cancelled_tasks,
+    AVG(reward) as avg_reward,
+    SUM(reward) as total_reward
+FROM task;
 
--- 管理员操作日志表
-CREATE TABLE IF NOT EXISTS admin_log (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '日志ID',
-    admin_id BIGINT NOT NULL COMMENT '管理员用户ID',
-    action VARCHAR(50) NOT NULL COMMENT '操作类型',
-    target_type VARCHAR(50) COMMENT '操作目标类型（user/task/order）',
-    target_id BIGINT COMMENT '操作目标ID',
-    detail TEXT COMMENT '操作详情',
-    ip_address VARCHAR(50) COMMENT '操作IP',
-    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '操作时间',
-    INDEX idx_admin_id (admin_id),
-    INDEX idx_create_time (create_time),
-    INDEX idx_target (target_type, target_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='管理员操作日志表';
+-- 创建订单统计视图（在 order_service 数据库中）
+CREATE OR REPLACE VIEW order_stats AS
+SELECT 
+    COUNT(*) as total_orders,
+    COUNT(CASE WHEN status = 1 THEN 1 END) as taken_orders,
+    COUNT(CASE WHEN status = 2 THEN 1 END) as completed_orders,
+    COUNT(CASE WHEN status = 3 THEN 1 END) as confirmed_orders,
+    COUNT(CASE WHEN status = 4 THEN 1 END) as cancelled_orders,
+    SUM(reward_points) as total_reward_points
+FROM delivery_order;
 
--- 系统配置表
-CREATE TABLE IF NOT EXISTS system_config (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '配置ID',
-    config_key VARCHAR(100) NOT NULL COMMENT '配置键',
-    config_value TEXT COMMENT '配置值',
-    description VARCHAR(255) COMMENT '配置说明',
-    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    UNIQUE KEY uk_config_key (config_key)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统配置表';
+-- 创建评价统计视图（在 evaluation_service 数据库中）
+CREATE OR REPLACE VIEW evaluation_stats AS
+SELECT 
+    COUNT(*) as total_evaluations,
+    AVG(score) as avg_score,
+    COUNT(CASE WHEN score = 5 THEN 1 END) as five_star_evaluations,
+    COUNT(CASE WHEN score = 4 THEN 1 END) as four_star_evaluations,
+    COUNT(CASE WHEN score = 3 THEN 1 END) as three_star_evaluations,
+    COUNT(CASE WHEN score = 2 THEN 1 END) as two_star_evaluations,
+    COUNT(CASE WHEN score = 1 THEN 1 END) as one_star_evaluations
+FROM evaluation;
 
--- 插入默认配置
-INSERT INTO system_config (config_key, config_value, description) VALUES
-('site.name', '校园帮帮送', '站点名称'),
-('site.max_tasks_per_user', '5', '每用户最多同时发布任务数'),
-('site.min_credit_score', '60', '最低信用分限制'),
-('site.auto_ban_threshold', '30', '信用分低于此值自动封禁');
-
--- 插入测试管理员日志
-INSERT INTO admin_log (admin_id, action, target_type, target_id, detail, ip_address) VALUES
-(1, 'LOGIN', 'user', 1, '管理员登录后台', '127.0.0.1'),
-(1, 'BAN_USER', 'user', 12, '封禁用户：违规发布任务', '127.0.0.1');
+-- 创建消息统计视图（在 message_service 数据库中）
+CREATE OR REPLACE VIEW message_stats AS
+SELECT 
+    COUNT(*) as total_messages,
+    COUNT(CASE WHEN is_read = 0 THEN 1 END) as unread_messages,
+    COUNT(CASE WHEN is_read = 1 THEN 1 END) as read_messages,
+    COUNT(CASE WHEN type = 1 THEN 1 END) as system_messages,
+    COUNT(CASE WHEN type = 2 THEN 1 END) as task_messages,
+    COUNT(CASE WHEN type = 3 THEN 1 END) as evaluation_messages
+FROM message;

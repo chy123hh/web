@@ -2,7 +2,7 @@ spring:
   application:
     name: order-service
   datasource:
-    url: jdbc:mysql://localhost:3306/order_service?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://192.168.199.130:3306/order_service?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -40,3 +40,32 @@ mybatis-plus:
 jwt:
   secret: campus-help-secret-key-for-jwt-token-2024
   expire: 604800000
+
+# Feign 配置
+feign:
+  client:
+    config:
+      default:  # 默认配置
+        connectTimeout: 5000  # 连接超时时间（毫秒）
+        readTimeout: 10000    # 读取超时时间（毫秒）
+        loggerLevel: BASIC    # 日志级别：NONE, BASIC, HEADERS, FULL
+  compression:
+    request:
+      enabled: true  # 启用请求压缩
+      mime-types: text/xml,application/xml,application/json  # 支持的 MIME 类型
+      min-request-size: 2048  # 最小请求大小（字节）
+    response:
+      enabled: true  # 启用响应压缩
+  okhttp:
+    enabled: true  # 启用 OkHttp 作为 HTTP 客户端
+    connection-pool:
+      max-idle-connections: 5  # 最大空闲连接数
+      keep-alive-minutes: 5    # 连接存活时间（分钟）
+
+# 负载均衡器配置
+spring:
+  cloud:
+    loadbalancer:
+      enabled: true  # 启用负载均衡
+      ribbon:
+        enabled: false  # 禁用 Ribbon（使用 Spring Cloud LoadBalancer）

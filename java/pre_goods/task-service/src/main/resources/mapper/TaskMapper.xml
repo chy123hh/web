@@ -1,4 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.example.mapper.TaskMapper">
+
+    <!-- 分页查询指定状态的任务 -->
+    <select id="selectByStatusWithPagination" resultType="org.example.entity.Task">
+        SELECT 
+            id, user_id, title, description, type, reward, 
+            pickup_location, delivery_location, status, 
+            acceptor_id, create_time, update_time, deadline
+        FROM task 
+        WHERE status = #{status} 
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 分页查询指定用户发布的任务 -->
+    <select id="selectByUserIdWithPagination" resultType="org.example.entity.Task">
+        SELECT 
+            id, user_id, title, description, type, reward, 
+            pickup_location, delivery_location, status, 
+            acceptor_id, create_time, update_time, deadline
+        FROM task 
+        WHERE user_id = #{userId} 
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 分页查询指定用户接单的任务 -->
+    <select id="selectByAcceptorIdWithPagination" resultType="org.example.entity.Task">
+        SELECT 
+            id, user_id, title, description, type, reward, 
+            pickup_location, delivery_location, status, 
+            acceptor_id, create_time, update_time, deadline
+        FROM task 
+        WHERE acceptor_id = #{acceptorId} 
+        ORDER BY create_time DESC
+    </select>
+
 </mapper>

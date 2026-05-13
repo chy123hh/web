@@ -43,27 +43,31 @@ public class EvaluationController {
     }
 
     /**
-     * 查询我收到的评价
+     * 查询我收到的评价（分页）
      */
     @GetMapping("/received")
-    public Result<List<EvaluationResponse>> getReceivedEvaluations(HttpServletRequest httpRequest) {
+    public Result getReceivedEvaluations(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            HttpServletRequest httpRequest) {
         String token = httpRequest.getHeader("Authorization").replace("Bearer ", "");
         Long userId = jwtUtil.getUserIdFromToken(token);
         
-        List<EvaluationResponse> evaluations = evaluationService.getEvaluationsReceived(userId);
-        return Result.success(evaluations);
+        return evaluationService.getEvaluationsReceived(userId, page, size);
     }
 
     /**
-     * 查询我发布的评价
+     * 查询我发布的评价（分页）
      */
     @GetMapping("/given")
-    public Result<List<EvaluationResponse>> getGivenEvaluations(HttpServletRequest httpRequest) {
+    public Result getGivenEvaluations(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            HttpServletRequest httpRequest) {
         String token = httpRequest.getHeader("Authorization").replace("Bearer ", "");
         Long userId = jwtUtil.getUserIdFromToken(token);
         
-        List<EvaluationResponse> evaluations = evaluationService.getEvaluationsGiven(userId);
-        return Result.success(evaluations);
+        return evaluationService.getEvaluationsGiven(userId, page, size);
     }
 
     /**

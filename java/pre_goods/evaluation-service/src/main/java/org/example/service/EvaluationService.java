@@ -18,14 +18,22 @@ public interface EvaluationService {
     EvaluationResponse getEvaluationById(Long id);
 
     /**
-     * 查询我收到的评价
+     * 查询我收到的评价（分页）
+     * @param userId 用户 ID
+     * @param page 页码
+     * @param size 每页数量
+     * @return 分页结果
      */
-    List<EvaluationResponse> getEvaluationsReceived(Long userId);
+    org.example.common.dto.Result getEvaluationsReceived(Long userId, Integer page, Integer size);
 
     /**
-     * 查询我发布的评价
+     * 查询我发布的评价（分页）
+     * @param userId 用户 ID
+     * @param page 页码
+     * @param size 每页数量
+     * @return 分页结果
      */
-    List<EvaluationResponse> getEvaluationsGiven(Long userId);
+    org.example.common.dto.Result getEvaluationsGiven(Long userId, Integer page, Integer size);
 
     /**
      * 查询某个任务的評價

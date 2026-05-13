@@ -27,11 +27,17 @@ public interface OrderService {
 
     /**
      * 查询我接的订单
+     * @param page 页码
+     * @param size 每页数量
+     * @return 分页结果
      */
-    Result listMyTakenOrders();
+    Result listMyTakenOrders(Integer page, Integer size);
 
     /**
      * 查询我发布的订单对应的接单记录
+     * @param page 页码
+     * @param size 每页数量
+     * @return 分页结果
      */
-    Result listMyPublishedOrders();
+    Result listMyPublishedOrders(Integer page, Integer size);
 }

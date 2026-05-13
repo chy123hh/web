@@ -1,9 +1,12 @@
 package org.example.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.common.dto.PageResult;
 import org.example.common.dto.Result;
 import org.example.common.util.JwtUtil;
 import org.example.entity.Message;
@@ -13,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -45,25 +47,58 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
     }
 
     @Override
-    public Result getMyMessages() {
+    public Result getMyMessages(Integer page, Integer size) {
         Long userId = getCurrentUserId();
         if (userId == null) {
             return Result.error(401, "用户未登录");
         }
 
-        List<Message> messages = messageMapper.selectByReceiverId(userId);
-        return Result.success(messages);
+        // 创建分页对象
+        Page<Message> messagePage = new Page<>(page, size);
+        // 使用 MyBatis-Plus LambdaQueryWrapper 构建条件查询
+        Page<Message> resultPage = this.page(
+                messagePage,
+                new LambdaQueryWrapper<Message>()
+                        .eq(Message::getReceiverId, userId)
+                        .orderByDesc(Message::getCreateTime));
+
+        // 使用 PageResult 封装分页数据
+        PageResult<Message> pageResult = PageResult.of(
+                resultPage.getRecords(),
+                resultPage.getTotal(),
+                resultPage.getPages(),
+                resultPage.getCurrent(),
+                resultPage.getSize());
+
+        return Result.success(pageResult);
     }
 
     @Override
-    public Result getUnreadMessages() {
+    public Result getUnreadMessages(Integer page, Integer size) {
         Long userId = getCurrentUserId();
         if (userId == null) {
             return Result.error(401, "用户未登录");
         }
 
-        List<Message> messages = messageMapper.selectByReceiverIdAndStatus(userId, Message.STATUS_UNREAD);
-        return Result.success(messages);
+        // 创建分页对象
+        Page<Message> messagePage = new Page<>(page, size);
+        // 使用 MyBatis-Plus LambdaQueryWrapper 构建条件查询
+        Page<Message> resultPage = this.page(
+                messagePage,
+                new LambdaQueryWrapper<Message>()
+                        .eq(Message::getReceiverId, userId)
+                        .eq(Message::getStatus, Message.STATUS_UNREAD)
+                        .orderByDesc(Message::getCreateTime));
+
+        // 使用 PageResult 封装分页数据
+        PageResult<Message> pageResult = PageResult.of(
+                resultPage.getRecords(),
+                resultPage.getTotal(),
+                resultPage.getPages(),
+                resultPage.getCurrent(),
+                resultPage.getSize());
+
+        return Result.success(pageResult);
     }
 
     @Override

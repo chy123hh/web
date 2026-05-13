@@ -18,4 +18,14 @@ public interface UserService {
   Result points();
 
   Result credit();
+
+  /**
+   * 根据用户 ID 获取用户信息（供 Feign 调用）
+   */
+  Result getUserProfileById(Long userId);
+
+  /**
+   * 根据学号获取用户信息（供 Feign 调用）
+   */
+  Result getUserByStudentId(String studentId);
 }
