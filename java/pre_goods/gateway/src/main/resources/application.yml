@@ -5,7 +5,13 @@ server:
 spring:
   application:
     name: gateway-service  # 应用名称（需与 bootstrap.yml 一致）
+  config:
+    import:
+      - nacos:jwt-config.yml
+      - nacos:gateway-service.yml
   cloud:
+    compatibility-verifier:
+      enabled: false
     gateway:
       # 是否启用服务发现路由
       discovery:

@@ -4,52 +4,34 @@ server:
 spring:
   application:
     name: admin-service
+  config:
+    import:
+      - nacos:db-config.yml
+      - nacos:redis-config.yml
+      - nacos:jwt-config.yml
+      - nacos:feign-config.yml
+      - nacos:mybatis-config.yml
+      - nacos:admin-service.yml
+  cloud:
+    compatibility-verifier:
+      enabled: false
   datasource:
-    url: jdbc:mysql://192.168.199.130:3306/user_service?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: root
-    password: 123456
+    url: jdbc:mysql://${db.host}:${db.port}/user_service?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${db.username}
+    password: ${db.password}
     driver-class-name: com.mysql.cj.jdbc.Driver
   data:
     redis:
-      host: 192.168.199.130
-      port: 6379
-
-mybatis-plus:
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-    map-underscore-to-camel-case: true
-  global-config:
-    db-config:
-      id-type: auto
-      logic-delete-field: deleted
-      logic-delete-value: 1
-      logic-not-delete-value: 0
-
-jwt:
-  secret: campus-help-secret-key-for-jwt-token-2024
-  expire: 604800000
+      host: ${redis.host}
+      port: ${redis.port}
+      database: ${redis.database}
+      timeout: ${redis.timeout}
+      lettuce:
+        pool:
+          max-active: ${redis.lettuce.pool.max-active}
+          max-idle: ${redis.lettuce.pool.max-idle}
+          min-idle: ${redis.lettuce.pool.min-idle}
 
 logging:
   level:
     org.example: debug
-
-# Feign 配置
-feign:
-  client:
-    config:
-      default:
-        connectTimeout: 5000
-        readTimeout: 10000
-        loggerLevel: BASIC
-  compression:
-    request:
-      enabled: true
-      mime-types: text/xml,application/xml,application/json
-      min-request-size: 2048
-    response:
-      enabled: true
-  okhttp:
-    enabled: true
-    connection-pool:
-      max-idle-connections: 5
-      keep-alive-minutes: 5

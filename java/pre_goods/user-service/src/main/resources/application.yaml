@@ -1,10 +1,22 @@
+server:
+  port: 8081
+
 spring:
   application:
     name: user-service
+  config:
+    import:
+      - nacos:db-config.yml
+      - nacos:jwt-config.yml
+      - nacos:mybatis-config.yml
+      - nacos:user-service.yml
+  cloud:
+    compatibility-verifier:
+      enabled: false
   datasource:
-    url: jdbc:mysql://192.168.199.130:3306/user_service?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: root
-    password: 123456
+    url: jdbc:mysql://${db.host}:${db.port}/user_service?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${db.username}
+    password: ${db.password}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       minimum-idle: 5
@@ -13,34 +25,14 @@ spring:
       connection-timeout: 20000
       max-lifetime: 1800000
 
-# MyBatis-Plus 配置
-mybatis-plus:
-  configuration:
-    map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-  global-config:
-    db-config:
-      id-type: auto
-      table-underline: true
-  mapper-locations: classpath:mapper/*.xml
-
-# JWT 配置
-jwt:
-  secret: campus-help-secret-key-for-jwt-token-2024
-  expire: 604800000  # 7天（毫秒）
-
-# Spring Boot Actuator 配置
 management:
   endpoints:
     web:
       exposure:
-        include: health,info  # 只暴露健康检查和基本信息接口
+        include: health,info
     endpoint:
       health:
         enabled: true
-        show-details: when_authorized  # 详细信息只在授权时显示
+        show-details: when_authorized
       info:
         enabled: true
-
-server:
-  port: 8081

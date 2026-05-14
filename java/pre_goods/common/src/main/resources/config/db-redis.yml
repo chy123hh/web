@@ -15,17 +15,14 @@
 
 # ---------- MySQL 数据库连接 ----------
 db:
-  # host: localhost
-  host: 192.168.100.129
+  host: 192.168.199.130
   port: 3306
   username: root
-  #password: 123456
-  password: 123
+  password: 123456
 
 # ---------- Redis 连接 ----------
 redis:
-  host: 192.168.100.129
-  #host: 192.168.199.130
+  host: 192.168.199.130
   port: 6379
   password:
   database: 0
@@ -35,5 +32,8 @@ redis:
       max-active: 8
       max-idle: 8
       min-idle: 0
+
+# ---------- Elasticsearch 连接 ----------
 elasticsearch:
-  host: 192.168.100.129
+  host: 192.168.199.130
+  port: 9200

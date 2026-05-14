@@ -96,29 +96,24 @@
             <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
 
-        <!-- Nacos 服务注册与发现（等公共服务配置好后启用） -->
-        <!--
+        <!-- Nacos 服务注册与发现 -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
         </dependency>
-        -->
 
-        <!-- Nacos 配置中心（等公共服务配置好后启用） -->
-        
+        <!-- Nacos 配置中心 -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
         
 
-        <!-- Spring Cloud Bootstrap（等公共服务配置好后启用） -->
-        <!--
+        <!-- Spring Cloud Bootstrap -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-bootstrap</artifactId>
         </dependency>
-        -->
 
         <!-- Spring Cloud OpenFeign (服务间调用) -->
         <dependency>
