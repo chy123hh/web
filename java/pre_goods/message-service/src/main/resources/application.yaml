@@ -4,14 +4,6 @@ server:
 spring:
   application:
     name: message-service
-  config:
-    import:
-      - nacos:db-config.yml
-      - nacos:redis-config.yml
-      - nacos:jwt-config.yml
-      - nacos:feign-config.yml
-      - nacos:mybatis-config.yml
-      - nacos:message-service.yml
   datasource:
     url: jdbc:mysql://${db.host}:${db.port}/message_service?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: ${db.username}
@@ -28,9 +20,6 @@ spring:
           max-active: ${redis.lettuce.pool.max-active}
           max-idle: ${redis.lettuce.pool.max-idle}
           min-idle: ${redis.lettuce.pool.min-idle}
-  cloud:
-    compatibility-verifier:
-      enabled: false
 
 logging:
   level:

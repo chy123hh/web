@@ -4,15 +4,6 @@ server:
 spring:
   application:
     name: search-service
-  config:
-    import:
-      - nacos:db-config.yml
-      - nacos:es-config.yml
-      - nacos:mybatis-config.yml
-      - nacos:search-service.yml
-  cloud:
-    compatibility-verifier:
-      enabled: false
   datasource:
     url: jdbc:mysql://${db.host}:${db.port}/task_service?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: ${db.username}

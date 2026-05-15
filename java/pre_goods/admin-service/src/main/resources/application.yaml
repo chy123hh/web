@@ -4,17 +4,6 @@ server:
 spring:
   application:
     name: admin-service
-  config:
-    import:
-      - nacos:db-config.yml
-      - nacos:redis-config.yml
-      - nacos:jwt-config.yml
-      - nacos:feign-config.yml
-      - nacos:mybatis-config.yml
-      - nacos:admin-service.yml
-  cloud:
-    compatibility-verifier:
-      enabled: false
   datasource:
     url: jdbc:mysql://${db.host}:${db.port}/user_service?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: ${db.username}

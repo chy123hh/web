@@ -4,15 +4,19 @@ server:
 spring:
   application:
     name: user-service
-  config:
-    import:
-      - nacos:db-config.yml
-      - nacos:jwt-config.yml
-      - nacos:mybatis-config.yml
-      - nacos:user-service.yml
   cloud:
     compatibility-verifier:
       enabled: false
+    sentinel:
+      enabled: true
+      transport:
+        dashboard: localhost:9090
+        port: 8719
+      eager: true
+      filter:
+        enabled: true
+      servlet:
+        block-page: /blocked
   datasource:
     url: jdbc:mysql://${db.host}:${db.port}/user_service?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: ${db.username}

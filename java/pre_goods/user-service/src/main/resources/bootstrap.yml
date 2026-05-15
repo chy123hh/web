@@ -10,8 +10,28 @@ spring:
         namespace: ""  # 命名空间，默认为 public
         group: DEFAULT_GROUP  # 配置分组
         refresh-enabled: true  # 是否启用配置刷新
+        # 在 bootstrap 阶段加载共享配置
+        shared-configs:
+          - data-id: db-config.yml
+            group: DEFAULT_GROUP
+            refresh: true
+          - data-id: jwt-config.yml
+            group: DEFAULT_GROUP
+            refresh: true
+          - data-id: mybatis-config.yml
+            group: DEFAULT_GROUP
+            refresh: true
+          - data-id: user-service.yml
+            group: DEFAULT_GROUP
+            refresh: true
       discovery:
         server-addr: 192.168.199.130:8848  # Nacos 服务注册中心地址
         enabled: true  # 启用服务注册与发现
         namespace: ""  # 命名空间
         group: DEFAULT_GROUP  # 服务分组
+    sentinel:
+      enabled: true  # 启用 Sentinel
+      transport:
+        dashboard: localhost:9090  # Sentinel Dashboard 地址
+        port: 8719  # Sentinel 客户端端口
+      eager: true  # 延迟加载控制台配置

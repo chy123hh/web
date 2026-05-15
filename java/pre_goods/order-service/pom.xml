@@ -133,6 +133,12 @@
             <artifactId>feign-okhttp</artifactId>
             <version>13.2.1</version>
         </dependency>
+
+        <!-- Sentinel 服务保护 -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

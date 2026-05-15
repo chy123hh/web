@@ -27,8 +27,8 @@ public class FeignConfig {
         return new RequestInterceptor() {
             @Override
             public void apply(RequestTemplate template) {
-                ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
-                        .getRequestAttributes();
+                ServletRequestAttributes attributes =
+                        (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
                 if (attributes != null) {
                     HttpServletRequest request = attributes.getRequest();
@@ -61,17 +61,10 @@ public class FeignConfig {
                         template.header("X-Request-Id", requestId);
                     }
 
-                    log.debug("Feign 请求拦截器完成，请求路径: {}, 用户ID: {}",
+                    log.debug("Feign 请求拦截器完成，请求路径: {}, 用户ID: {}", 
                             template.url(), userId);
                 }
             }
         };
     }
-
-    /**
-     * Feign 与 Sentinel 集成说明：
-     * 1. 已在 pom.xml 中添加 spring-cloud-starter-alibaba-sentinel 依赖
-     * 2. 需在 application.yml 中配置 feign.sentinel.enabled: true
-     * 配置完成后，Sentinel 将自动拦截所有 Feign 客户端调用，实现熔断降级保护
-     */
 }

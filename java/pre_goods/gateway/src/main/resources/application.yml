@@ -1,145 +1,86 @@
-# 应用配置文件
+# 应用配置文件 - 测试 Sentinel
 server:
-  port: 8080  # 网关服务端口
+  port: 8080
 
 spring:
   application:
-    name: gateway-service  # 应用名称（需与 bootstrap.yml 一致）
+    name: gateway-service
   config:
-    import:
-      - nacos:jwt-config.yml
-      - nacos:gateway-service.yml
+    import: optional:nacos:192.168.199.130:8848
+  autoconfigure:
+    exclude:
+      - com.alibaba.cloud.sentinel.gateway.scg.SentinelSCGAutoConfiguration
   cloud:
-    compatibility-verifier:
-      enabled: false
+    nacos:
+      config:
+        server-addr: 192.168.199.130:8848
+        file-extension: yml
+        namespace: ""
+        group: DEFAULT_GROUP
+        refresh-enabled: true
+      discovery:
+        server-addr: 192.168.199.130:8848
+        enabled: true
+        namespace: ""
+        group: DEFAULT_GROUP
     gateway:
-      # 是否启用服务发现路由
       discovery:
         locator:
-          enabled: true  # 启用服务发现
-          lower-case-service-id: true  # 使用小写服务 ID
-      # 全局跨域配置
+          enabled: true
+          lower-case-service-id: true
       globalcors:
         cors-configurations:
           '[/**]':
-            allowedOrigins: "*"  # 允许所有来源
-            allowedMethods: "*"  # 允许所有方法
-            allowedHeaders: "*"  # 允许所有头
-      # 默认过滤器
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
       default-filters:
-        # 添加响应头
         - AddResponseHeader=X-Gateway, gateway-service
-        # 添加请求头
-        - AddRequestHeader=X-Gateway-Request, true
-      # 路由配置
       routes:
-        # 用户服务路由
         - id: user-service
-          uri: lb://user-service  # 负载均衡到 user-service
+          uri: lb://user-service
           predicates:
-            - Path=/user/**,/api/user/**  # 路径匹配
+            - Path=/user/**,/api/user/**
           filters:
-            - StripPrefix=0  # 不剥离路径前缀
-            # 认证过滤器（JWT 校验）
-            - name: JwtAuthFilter
-              args:
-                enabled: true
-                # 放行的路径
-                skipPaths: /user/login,/user/register,/actuator/health
-        
-        # 订单服务路由
+            - StripPrefix=0
+
         - id: order-service
           uri: lb://order-service
           predicates:
             - Path=/order/**,/api/order/**
           filters:
             - StripPrefix=0
-            # 需要认证
-            - name: JwtAuthFilter
-              args:
-                enabled: true
-                skipPaths: /actuator/health
-        
-        # 任务服务路由
+
         - id: task-service
           uri: lb://task-service
           predicates:
             - Path=/task/**,/api/task/**
           filters:
             - StripPrefix=0
-            - name: JwtAuthFilter
-              args:
-                enabled: true
-                skipPaths: /actuator/health
-        
-        # 评价服务路由
-        - id: evaluation-service
-          uri: lb://evaluation-service
-          predicates:
-            - Path=/evaluation/**,/api/evaluation/**
-          filters:
-            - StripPrefix=0
-            - name: JwtAuthFilter
-              args:
-                enabled: true
-                skipPaths: /actuator/health
-        
-        # 消息服务路由
-        - id: message-service
-          uri: lb://message-service
-          predicates:
-            - Path=/message/**,/api/message/**
-          filters:
-            - StripPrefix=0
-            - name: JwtAuthFilter
-              args:
-                enabled: true
-                skipPaths: /actuator/health
-        
-        # 搜索服务路由
-        - id: search-service
-          uri: lb://search-service
-          predicates:
-            - Path=/search/**,/api/search/**
-          filters:
-            - StripPrefix=0
-            - name: JwtAuthFilter
-              args:
-                enabled: true
-                skipPaths: /actuator/health
-        
-        # 管理服务路由
-        - id: admin-service
-          uri: lb://admin-service
-          predicates:
-            - Path=/admin/**,/api/admin/**
-          filters:
-            - StripPrefix=0
-            - name: JwtAuthFilter
-              args:
-                enabled: true
-                skipPaths: /actuator/health
 
-# 管理端点配置
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,gateway  # 暴露的端点
+        include: health,info,gateway
   endpoint:
     health:
-      show-details: always  # 显示健康检查详情
+      show-details: always
     gateway:
-      enabled: true  # 启用网关端点
+      enabled: true
 
-# JWT 配置
-jwt:
-  secret: campus-help-secret-key-for-jwt-token-2024  # JWT 密钥
-  expire: 604800000  # JWT 过期时间（7 天，单位：毫秒）
-
-# 日志配置
 logging:
   level:
     root: INFO
-    org.springframework.cloud.gateway: DEBUG  # 网关调试日志
-    org.example: DEBUG  # 项目日志
+    org.springframework.cloud.gateway: DEBUG
+    org.example: DEBUG
+    com.alibaba.csp.sentinel: DEBUG
+
+sentinel:
+  metrics:
+    enabled: true
+    file-single-size: 10485760
+    file-total-size: 52428800
+  log:
+    dir: logs/sentinel
+    switch-prompt: true
